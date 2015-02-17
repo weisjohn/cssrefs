@@ -26,7 +26,8 @@ func main() {
 
 ### output
 
-``` $ go run example-cssrefs.go
+```golang
+$ go run example-cssrefs.go
 css : fineprint.css
 font : ../fonts/bootstrap/glyphicons-halflings-regular.eot
 font : ../fonts/bootstrap/glyphicons-halflings-regular.eot?#iefix
