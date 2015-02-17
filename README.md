@@ -26,7 +26,16 @@ func main() {
 
 ### output
 
-// TODO:
+``` $ go run example-cssrefs.go
+css : fineprint.css
+font : ../fonts/bootstrap/glyphicons-halflings-regular.eot
+font : ../fonts/bootstrap/glyphicons-halflings-regular.eot?#iefix
+font : ../fonts/bootstrap/glyphicons-halflings-regular.woff
+font : ../fonts/bootstrap/glyphicons-halflings-regular.ttf
+font : ../fonts/bootstrap/glyphicons-halflings-regular.svg#glyphicons_halflingsregular
+img : ../img/light_honeycomb_@2X.png
+img : ../img/light_honeycomb.png
+```
 
 ### struct
 
