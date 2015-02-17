@@ -7,6 +7,18 @@ import (
 
 func TestAll(t *testing.T) {
 
+	// the required resources to be found in the example
+	reqs := [...]Reference{
+		{URI: "fineprint.css", Token: "css"},
+		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.eot", Token: "font"},
+		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.eot?#iefix", Token: "font"},
+		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.woff", Token: "font"},
+		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.ttf", Token: "font"},
+		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.svg#glyphicons_halflingsregular", Token: "font"},
+		{URI: "../img/light_honeycomb_@2X.png", Token: "img"},
+		{URI: "../img/light_honeycomb.png", Token: "img"},
+	}
+
 	// example HTML reader
 	reader := strings.NewReader(`
 
@@ -29,4 +41,24 @@ func TestAll(t *testing.T) {
         }
 	`)
 
+	// get the refs from the implementation
+	refs := All(reader)
+
+	need, have := len(reqs), len(refs)
+	if need != have {
+		t.Errorf("Wrong number of refs returned. need: %d , have: %d", need, have)
+	}
+
+	// loop through and verify URI and Token names
+	for i, req := range reqs {
+		ref := refs[i]
+
+		if req.URI != ref.URI {
+			t.Errorf("Mismatch URI detected. need: %s , have: %s", req.URI, ref.URI)
+		}
+
+		if req.Token != ref.Token {
+			t.Errorf("Mismatch Token detected. need: %s , have: %s", req.Token, ref.Token)
+		}
+	}
 }
