@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-    resp, _ := http.Get("johnweis.com/css/main.css")
+    resp, _ := http.Get("http://johnweis.com/css/main.css")
     refs := cssrefs.All(resp.Body)
 
     for _, ref := range refs {
