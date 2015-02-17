@@ -2,9 +2,9 @@
 package cssrefs
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
+	"regexp"
 
 	"github.com/weisjohn/css/scanner"
 )
@@ -18,6 +18,14 @@ var identTerminators = map[string]string{
 	"@font-face":       "}",
 	"background":       ";",
 	"background-image": ";",
+}
+
+// a small map of the CSS-spec identifiers to token type
+var identTokens = map[string]string{
+	"@import":          "css",
+	"@font-face":       "font",
+	"background":       "img",
+	"background-image": "img",
 }
 
 // `All` takes a reader object (like the one returned from http.Get())
@@ -35,6 +43,9 @@ func All(httpBody io.Reader) []Reference {
 	// the current identifier that we're matching against, if any
 	ident := ""
 	_ = ident
+
+	// the regex for url("[matching]")
+	reg, _ := regexp.Compile(`url\([\'\"]([^)]+)[\'\"]\)`)
 
 	for {
 
@@ -75,10 +86,18 @@ func All(httpBody io.Reader) []Reference {
 			continue
 		}
 
-		// if we've found an identifier, find URIs
+		// if we've found an identifier, find URIs based on regex
 		if ident != "" && Type == scanner.TokenURI {
-			fmt.Println("ident", ident, "uri", Value)
-			// TODO: find URIs
+			general := reg.FindAllStringSubmatch(Value, -1)
+			if len(general) <= 0 {
+				continue
+			}
+			matches := general[0]
+			if len(matches) != 2 {
+				continue
+			}
+
+			refs = append(refs, Reference{URI: matches[1], Token: identTokens[ident]})
 			continue
 		}
 
