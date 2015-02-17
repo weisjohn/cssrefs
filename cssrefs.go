@@ -13,7 +13,7 @@ import (
 type Reference struct{ URI, Token string }
 
 // a map of which tokens :: attr names to examine
-var identifierTerminators = map[string]bool{
+var identTerminators = map[string]string{
 	"@import":          ";",
 	"@font-face":       "}",
 	"background":       ";",
@@ -32,8 +32,9 @@ func All(httpBody io.Reader) []Reference {
 	// create a new document
 	doc := scanner.New(string(b))
 
-	// the current identifier, if any
+	// the current identifier that we're matching against, if any
 	ident := ""
+	_ = ident
 
 	for {
 
@@ -41,34 +42,52 @@ func All(httpBody io.Reader) []Reference {
 		token := doc.Next()
 
 		// shorter access
-		Type := token.Type
+		Type, Value := token.Type, token.Value
 
 		// exit condition
 		if Type == scanner.TokenEOF || Type == scanner.TokenError {
 			break
 		}
 
-		// continue condition
+		// continue condition for Types
 		switch Type {
 		case scanner.TokenAtKeyword, scanner.TokenIdent, scanner.TokenChar, scanner.TokenURI:
 		default:
 			continue
 		}
 
-		Value := token.Value
-
-		fmt.Println(Type, Value)
+		// continue conditions for Values
+		switch Value {
+		case "", ":", ",", "{":
+			continue
+		}
 
 		// find identifiers
 		if Type == scanner.TokenAtKeyword {
-
+			if Value == "@import" || Value == "@font-face" {
+				ident = Value
+			}
+			continue
 		} else if Type == scanner.TokenIdent {
 			if Value == "background" || Value == "background-image" {
-
+				ident = Value
 			}
 			continue
 		}
 
+		// if we've found an identifier, find URIs
+		if ident != "" && Type == scanner.TokenURI {
+			fmt.Println("ident", ident, "uri", Value)
+			// TODO: find URIs
+			continue
+		}
+
+		// terminate finding an identifier
+		if Type == scanner.TokenChar {
+			if ident != "" && Value == identTerminators[ident] {
+				ident = ""
+			}
+		}
 	}
 
 	return refs
