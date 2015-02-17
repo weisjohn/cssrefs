@@ -42,7 +42,7 @@ img : ../img/light_honeycomb.png
 
 `cssrefs` returns a slice of `Reference`s
 
-```
+```go
 type Reference struct {
     URI, Token string
 }
