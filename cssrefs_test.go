@@ -10,6 +10,7 @@ func TestAll(t *testing.T) {
 	// the required resources to be found in the example
 	reqs := [...]Reference{
 		{URI: "fineprint.css", Token: "css"},
+		{URI: "../foo.css", Token: "css"},
 		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.eot", Token: "font"},
 		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.eot?#iefix", Token: "font"},
 		{URI: "../fonts/bootstrap/glyphicons-halflings-regular.woff", Token: "font"},
@@ -23,6 +24,7 @@ func TestAll(t *testing.T) {
 	reader := strings.NewReader(`
 
         @import url("fineprint.css") print;
+        @import "../foo.css";
 
         @font-face {
           font-family: 'Glyphicons Halflings';
