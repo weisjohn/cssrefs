@@ -33,6 +33,10 @@ func TestAll(t *testing.T) {
             url('../fonts/bootstrap/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg'); 
         }
 
+        .foo {
+            background: red;
+        }
+
         body {
             background: url('../img/light_honeycomb_@2X.png');
             background-image: url('../img/light_honeycomb.png');
