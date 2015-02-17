@@ -40,12 +40,13 @@ func All(httpBody io.Reader) []Reference {
 	// create a new document
 	doc := scanner.New(string(b))
 
-	// the current identifier that we're matching against, if any
+	// the current identifier matching against
 	ident := ""
 	_ = ident
 
-	// the regex for url("[matching]")
-	reg, _ := regexp.Compile(`url\([\'\"]([^)]+)[\'\"]\)`)
+	// the regex for `url("[match]")`, and for "[match]"
+	urireg, _ := regexp.Compile(`url\([\'\"]([^)]+)[\'\"]\)`)
+	quotes, _ := regexp.Compile(`[\'\"]([^)]+)[\'\"]`)
 
 	for {
 
@@ -62,7 +63,7 @@ func All(httpBody io.Reader) []Reference {
 
 		// continue condition for Types
 		switch Type {
-		case scanner.TokenAtKeyword, scanner.TokenIdent, scanner.TokenChar, scanner.TokenURI:
+		case scanner.TokenAtKeyword, scanner.TokenIdent, scanner.TokenURI, scanner.TokenString, scanner.TokenChar:
 		default:
 			continue
 		}
@@ -86,18 +87,22 @@ func All(httpBody io.Reader) []Reference {
 			continue
 		}
 
-		// if we've found an identifier, find URIs based on regex
-		if ident != "" && Type == scanner.TokenURI {
-			general := reg.FindAllStringSubmatch(Value, -1)
-			if len(general) <= 0 {
-				continue
+		// if we've found an identifier, find URIs based on uriregex
+		if Type == scanner.TokenURI && ident != "" {
+			urimatches := urireg.FindAllStringSubmatch(Value, -1)
+			// if there's no url reference and ident != @import, bolt
+			if len(urimatches) >= 1 && len(urimatches[0]) >= 2 {
+				refs = append(refs, Reference{URI: urimatches[0][1], Token: identTokens[ident]})
 			}
-			matches := general[0]
-			if len(matches) != 2 {
-				continue
-			}
+			continue
+		}
 
-			refs = append(refs, Reference{URI: matches[1], Token: identTokens[ident]})
+		// look for non URI sources for @import statements
+		if Type == scanner.TokenString && ident == "@import" {
+			quotematches := quotes.FindAllStringSubmatch(Value, -1)
+			if len(quotematches) >= 1 && len(quotematches[0]) >= 2 {
+				refs = append(refs, Reference{URI: quotematches[0][1], Token: identTokens[ident]})
+			}
 			continue
 		}
 
